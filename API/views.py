@@ -1,10 +1,10 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, filters
 from .models import Post
 from .serializer import PostSerializer, UserSerializer
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from django.contrib.auth import authenticate
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -29,3 +29,12 @@ def login(request):
         token, _ = Token.objects.get_or_create(user=user)
         return Response({'token': token.key})
     return Response({'error': 'Invalid credentials'}, status=400)
+
+
+class PostViewSet(viewsets.ModelViewSet):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    filter_backends = [filters.SearchFilter]
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    search_fields = ['title', 'body']  # Searchable fields
+
